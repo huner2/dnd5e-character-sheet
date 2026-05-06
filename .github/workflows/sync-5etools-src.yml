@@ -1,0 +1,47 @@
+name: Sync 5etools-src submodule
+
+on:
+  schedule:
+    # Nightly 06:15 UTC (~after typical mirror pushes)
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sync-5etools-src
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Update submodule to latest main
+        run: |
+          git submodule update --init vendor/5etools-src
+          cd vendor/5etools-src
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+          cd "${GITHUB_WORKSPACE}"
+          git add vendor/5etools-src
+
+      - name: Commit and push if submodule pointer changed
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          if git diff --staged --quiet; then
+            echo "Submodule already at latest recorded commit; nothing to commit."
+          else
+            git commit -m "chore: sync vendor/5etools-src (5etools-mirror-3/main)"
+            git push
+          fi
