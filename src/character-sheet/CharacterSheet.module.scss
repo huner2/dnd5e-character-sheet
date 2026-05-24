@@ -1,0 +1,488 @@
+.page {
+  background: var(--mantine-color-body);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.appLayout {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+
+  @media (max-width: 48em) {
+    flex-direction: column;
+  }
+}
+
+.sheetSidebar {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-sm);
+  border-right: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-default-hover);
+  min-height: 0;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+/** Fills space above the Create button so the list scrolls and the button stays at the bottom. */
+.sheetSidebarScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sheetSidebarCreate {
+  flex-shrink: 0;
+}
+
+@media (max-width: 48em) {
+  .sheetSidebar {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--mantine-color-default-border);
+    max-height: min(40svh, 320px);
+    align-self: stretch;
+    overflow: hidden;
+  }
+
+  .sheetSidebarScroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(28svh, 220px);
+  }
+
+  .sheetMain {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+.sheetSidebarRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sheetSidebarItem {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  padding: 8px 10px;
+  text-align: start;
+  cursor: pointer;
+  background: transparent;
+  color: var(--mantine-color-text);
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.06));
+  }
+}
+
+.sheetSidebarItemActive {
+  background: light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.09));
+  outline: 1px solid var(--mantine-color-default-border);
+}
+
+.sheetMain {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: var(--mantine-spacing-md);
+  padding-inline: var(--mantine-spacing-sm);
+}
+
+/**
+ * Mantine striped rows vs card default often lack contrast in dark mode.
+ * Use slightly darker (not lighter) stripes so controls/borders on cells stay readable.
+ */
+:global(html[data-mantine-color-scheme='dark']) .sheetMain :global(table) {
+  --table-striped-color: color-mix(
+    in srgb,
+    var(--mantine-color-black) 14%,
+    var(--mantine-color-default)
+  );
+  --table-hover-color: color-mix(
+    in srgb,
+    var(--mantine-color-black) 20%,
+    var(--mantine-color-default)
+  );
+}
+
+.section {
+  border: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-default);
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}
+
+.sectionHeader {
+  background: var(--mantine-color-default-hover);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  letter-spacing: 0.04em;
+}
+
+.headerGrid {
+  display: grid;
+  gap: var(--mantine-spacing-xs);
+  grid-template-columns: 1fr auto;
+  align-items: start;
+
+  @media (max-width: 62em) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.identityFields {
+  display: grid;
+  gap: var(--mantine-spacing-xs);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 48em) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+  justify-content: flex-end;
+
+  @media (max-width: 62em) {
+    justify-content: flex-start;
+  }
+}
+
+.levelRing {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--mantine-color-default-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: var(--mantine-color-default);
+}
+
+/** Heater-style shield: SVG fill + soft stroke (no clip-path so outline stays continuous). */
+.shieldAc {
+  position: relative;
+  box-sizing: border-box;
+  width: 3.75rem;
+  height: 4.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shieldAcSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--mantine-color-black) 14%, transparent));
+}
+
+.shieldAcShape {
+  fill: var(--mantine-color-default);
+  stroke: color-mix(in srgb, var(--mantine-color-text) 38%, transparent);
+  stroke-width: 1.35;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.shieldAcInputWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/** Ability tab: STR–CHA in a responsive multi-column grid (fewer tall single-column stacks). */
+.abilityScoresGrid {
+  display: grid;
+  gap: var(--mantine-spacing-sm);
+  /** stretch (default): boxes in the same row share one height */
+  grid-template-columns: 1fr;
+
+  @media (min-width: 48em) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 62em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  & > * {
+    min-width: 0;
+  }
+}
+
+/** Fill grid row height; inner stack grows so borders align when skill counts differ. */
+.abilityStatBox {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.abilityStatBoxBody {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/**
+ * Combat tab: row1 = Combat | Spellcasting (50/50).
+ * Row2 = full-width strip: spell slots (narrow) | weapons (wide) so the table isn’t squeezed.
+ */
+.combatGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--mantine-spacing-md);
+  align-items: start;
+
+  & > * {
+    min-width: 0;
+  }
+
+  @media (max-width: 62em) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.combatBottomRow {
+  grid-column: 1 / -1;
+  display: grid;
+  /** Spell slots column shrinks to content; weapons takes remaining space */
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--mantine-spacing-md);
+  align-items: start;
+
+  & > *:last-child {
+    min-width: 0;
+  }
+
+  @media (max-width: 62em) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/** Combat tab only (`shrinkToFit` on SpellSlotsCard): card width follows table, not help text. */
+.spellSlotsShrinkCard {
+  width: fit-content;
+  max-width: 100%;
+  justify-self: start;
+}
+
+.spellSlotsTableWrap {
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/** Help text lives in <caption>; constrained to table width so the card can shrink-wrap. */
+.spellSlotsCaption {
+  text-align: start;
+  padding-top: var(--mantine-spacing-xs);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/** Weapons table: column widths (table `layout="fixed"` from Mantine). */
+.weaponsTable {
+  width: 100%;
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 26%;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 9%;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 7%;
+  }
+
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 9%;
+  }
+
+  th:nth-child(5),
+  td:nth-child(5) {
+    width: 13%;
+  }
+
+  th:nth-child(6),
+  td:nth-child(6) {
+    width: 32%;
+  }
+}
+
+.spellSlotPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 28px;
+}
+
+.spellSlotPill {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  border-radius: 3px;
+  border: 2px solid var(--mantine-color-gray-6);
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-color-blue-filled);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+/** Shared filled-pill reset (per-theme colors below). */
+.spellSlotPillFilled {
+  box-shadow: none;
+}
+
+:global(html[data-mantine-color-scheme='light']) {
+  /**
+   * Empty pills only — must not match `.spellSlotPillFilled` or the white background wins on
+   * specificity over `.spellSlotPillFilled` (`.spellSlotPill:not(:disabled)` beats one class).
+   */
+  .spellSlotPill:not(:disabled):not(.spellSlotPillFilled) {
+    border-color: var(--mantine-color-gray-7);
+    background-color: var(--mantine-color-white);
+  }
+
+  /** Strong contrast on pale / striped rows */
+  .spellSlotPill.spellSlotPillFilled:not(:disabled) {
+    background-color: var(--mantine-color-dark-6);
+    border-color: var(--mantine-color-dark-4);
+  }
+}
+
+:global(html[data-mantine-color-scheme='dark']) {
+  .spellSlotPill:not(:disabled):not(.spellSlotPillFilled) {
+    border-color: var(--mantine-color-dark-2);
+    background-color: transparent;
+  }
+
+  /**
+   * Same deep navy as Mantine `ActionIcon variant="light"` / primary — `--mantine-color-blue-light`
+   * (not Input dark-6, which blended into striping and looked like “border only”).
+   */
+  .spellSlotPill.spellSlotPillFilled:not(:disabled) {
+    background-color: var(--mantine-color-blue-light);
+    border-color: var(--mantine-color-blue-light-hover);
+  }
+}
+
+/** Dark mode: Mantine Checkbox checked / indeterminate = same navy as pills / ActionIcon `light` */
+:global(html[data-mantine-color-scheme='dark']) .sheetMain :global(input[type='checkbox']:not(:disabled):checked),
+:global(html[data-mantine-color-scheme='dark'])
+  .sheetMain
+  :global(input[type='checkbox']:not(:disabled)[data-indeterminate]) {
+  background-color: var(--mantine-color-blue-light) !important;
+  border-color: var(--mantine-color-blue-light-hover) !important;
+}
+
+.skillRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--mantine-spacing-xs);
+  align-items: center;
+  font-size: var(--mantine-font-size-xs);
+}
+
+.saveRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--mantine-spacing-xs);
+  align-items: center;
+  font-size: var(--mantine-font-size-xs);
+  border-bottom: 1px dashed var(--mantine-color-default-border);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.predefinedSpellRow {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: var(--mantine-radius-sm);
+
+  &:hover {
+    background: var(--mantine-color-default-hover);
+  }
+}
+
+.predefinedSpellRowSelected {
+  background: var(--mantine-color-default-hover);
+  outline: 1px solid var(--mantine-color-default-border);
+}
+
+.spellPreviewDescription {
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mono {
+  font-family: var(--mantine-font-family-monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+/** Compendium (5etools) spell rows: readable text + accent; editing blocked except Notes. */
+.spellRowCompendium {
+  background: color-mix(in srgb, var(--mantine-color-blue-light-0) 35%, transparent);
+  box-shadow: inset 3px 0 0 var(--mantine-color-blue-filled);
+}
+
+:global(html[data-mantine-color-scheme='dark']) .spellRowCompendium {
+  background: color-mix(in srgb, var(--mantine-color-blue-light-7) 14%, transparent);
+}
+
+.spellCompendiumMark {
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.2;
+  user-select: none;
+}

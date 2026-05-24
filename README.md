@@ -1,30 +1,21 @@
-# neutralinojs-react
-A simple React.js template for building Neutralinojs apps
+# D&D 5e Character Sheet
 
-## How to install
+A browser-based D&D 5e character sheet built with React, Mantine, and vendored [5etools](https://github.com/5etools-mirror-3/5etools-src) compendium data.
 
-Create a new Neutralinojs project with this template with the following command:
+## Development
 
 ```bash
-neu create myapp --template codezri/neutralinojs-react
-cd myapp
+npm install
+git submodule update --init vendor/5etools-src
+npm run dev
 ```
 
-## How to develop
-
-Start the React development server and Neutralinojs app:
+Update compendium data locally:
 
 ```bash
-neu run
-```
-
-## How to bundle the app
-
-Trigger a new React build and create the application bundle with the following command:
-```bash
-neu build
+npm run sync:5etools
 ```
 
 ## License
 
-[MIT](LICENSE)
+Compendium data is vendored from 5etools; see `vendor/5etools-src` for upstream licensing.
