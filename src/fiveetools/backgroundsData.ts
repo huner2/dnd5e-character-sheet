@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import { rawJsonEntriesPlain } from './spellsData'
 
 /**
@@ -22,13 +23,15 @@ let cache: RawBackground[] | null = null
 
 export async function loadAllRawBackgrounds(): Promise<RawBackground[]> {
   if (cache) return cache
-  const loaders = Object.values(backgroundModules)
-  if (loaders.length !== 1) {
-    throw new Error('Expected exactly one backgrounds.json module from glob')
-  }
-  const mod = await loaders[0]!()
-  cache = Array.isArray(mod.background) ? mod.background : []
-  return cache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(backgroundModules)
+    if (loaders.length !== 1) {
+      throw new Error('Expected exactly one backgrounds.json module from glob')
+    }
+    const mod = await loaders[0]!()
+    cache = Array.isArray(mod.background) ? mod.background : []
+    return cache
+  })
 }
 
 export function backgroundRef(bg: Pick<RawBackground, 'name' | 'source'>): string {

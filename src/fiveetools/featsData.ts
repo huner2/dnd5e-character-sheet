@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import type { FeatRow } from '../character-sheet/types'
 import { rawJsonEntriesPlain, simplify5eToolsText } from './spellsData'
 
@@ -83,15 +84,17 @@ let cache: RawFeat[] | null = null
 
 export async function loadAllRawFeats(): Promise<RawFeat[]> {
   if (cache) return cache
-  const loaders = Object.values(featsModules)
-  if (loaders.length !== 1) {
-    throw new Error('Expected exactly one feats.json module from glob')
-  }
-  const raw = (await loaders[0]!()) as Record<string, unknown>
-  const mod = unwrap5eToolsJsonModule(raw)
-  const list = mod.feat
-  cache = Array.isArray(list) ? (list as RawFeat[]) : []
-  return cache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(featsModules)
+    if (loaders.length !== 1) {
+      throw new Error('Expected exactly one feats.json module from glob')
+    }
+    const raw = (await loaders[0]!()) as Record<string, unknown>
+    const mod = unwrap5eToolsJsonModule(raw)
+    const list = mod.feat
+    cache = Array.isArray(list) ? (list as RawFeat[]) : []
+    return cache
+  })
 }
 
 export function featRef(feat: Pick<RawFeat, 'name' | 'source'>): string {

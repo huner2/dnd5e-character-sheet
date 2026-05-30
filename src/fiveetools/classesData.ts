@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import { rawJsonEntriesPlain } from './spellsData'
 
 /**
@@ -131,39 +132,41 @@ function ordinalSuffix(n: number): string {
 
 async function loadClassCompendium(): Promise<ClassCompendiumCache> {
   if (cache) return cache
-  const classesOut: CompendiumClass[] = []
-  const subclassesOut: CompendiumSubclass[] = []
-  for (const load of Object.values(classChunkModules)) {
-    const mod = unwrap5eToolsJsonModule((await load()) as Record<string, unknown>)
-    const classFeats = Array.isArray(mod.classFeature) ? mod.classFeature : []
-    const subFeats = Array.isArray(mod.subclassFeature) ? mod.subclassFeature : []
-    const classList = Array.isArray(mod.class) ? mod.class : []
-    const subList = Array.isArray(mod.subclass) ? mod.subclass : []
+  return withStaleChunkRecovery(async () => {
+    const classesOut: CompendiumClass[] = []
+    const subclassesOut: CompendiumSubclass[] = []
+    for (const load of Object.values(classChunkModules)) {
+      const mod = unwrap5eToolsJsonModule((await load()) as Record<string, unknown>)
+      const classFeats = Array.isArray(mod.classFeature) ? mod.classFeature : []
+      const subFeats = Array.isArray(mod.subclassFeature) ? mod.subclassFeature : []
+      const classList = Array.isArray(mod.class) ? mod.class : []
+      const subList = Array.isArray(mod.subclass) ? mod.subclass : []
 
-    for (const c of classList) {
-      classesOut.push({
-        ...c,
-        _features: classFeats.filter(
-          (f) => f.className === c.name && f.classSource === c.source,
-        ),
-      })
+      for (const c of classList) {
+        classesOut.push({
+          ...c,
+          _features: classFeats.filter(
+            (f) => f.className === c.name && f.classSource === c.source,
+          ),
+        })
+      }
+      for (const s of subList) {
+        const sk = subclassShortKey(s)
+        subclassesOut.push({
+          ...s,
+          _features: subFeats.filter(
+            (f) =>
+              f.className === s.className &&
+              f.classSource === s.classSource &&
+              f.subclassShortName === sk &&
+              f.subclassSource === s.source,
+          ),
+        })
+      }
     }
-    for (const s of subList) {
-      const sk = subclassShortKey(s)
-      subclassesOut.push({
-        ...s,
-        _features: subFeats.filter(
-          (f) =>
-            f.className === s.className &&
-            f.classSource === s.classSource &&
-            f.subclassShortName === sk &&
-            f.subclassSource === s.source,
-        ),
-      })
-    }
-  }
-  cache = { classes: classesOut, subclasses: subclassesOut }
-  return cache
+    cache = { classes: classesOut, subclasses: subclassesOut }
+    return cache
+  })
 }
 
 export async function loadAllRawClasses(): Promise<CompendiumClass[]> {

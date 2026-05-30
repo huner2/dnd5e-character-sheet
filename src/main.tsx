@@ -6,10 +6,18 @@ import {
   localStorageColorSchemeManager,
 } from '@mantine/core'
 import '@mantine/core/styles.css'
+import {
+  clearChunkReloadAttempts,
+  installChunkLoadRecovery,
+} from './chunkLoadRecovery'
 import './index.scss'
 import App from './App.tsx'
 
+installChunkLoadRecovery()
+
 const COLOR_SCHEME_STORAGE_KEY = 'dnd5e-character-sheet-color-scheme'
+
+clearChunkReloadAttempts()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

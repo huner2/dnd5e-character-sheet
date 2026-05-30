@@ -1,4 +1,5 @@
 import type { LanguageRow } from '../character-sheet/types'
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import { rawJsonEntriesPlain, simplify5eToolsText } from './spellsData'
 
 /**
@@ -32,15 +33,17 @@ let cache: RawLanguage[] | null = null
 
 export async function loadAllRawLanguages(): Promise<RawLanguage[]> {
   if (cache) return cache
-  const loaders = Object.values(languagesModules)
-  if (loaders.length !== 1) {
-    throw new Error('Expected exactly one languages.json module from glob')
-  }
-  const raw = (await loaders[0]!()) as Record<string, unknown>
-  const mod = unwrap5eToolsJsonModule(raw)
-  const list = mod.language
-  cache = Array.isArray(list) ? (list as RawLanguage[]) : []
-  return cache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(languagesModules)
+    if (loaders.length !== 1) {
+      throw new Error('Expected exactly one languages.json module from glob')
+    }
+    const raw = (await loaders[0]!()) as Record<string, unknown>
+    const mod = unwrap5eToolsJsonModule(raw)
+    const list = mod.language
+    cache = Array.isArray(list) ? (list as RawLanguage[]) : []
+    return cache
+  })
 }
 
 export function languageRef(lang: Pick<RawLanguage, 'name' | 'source'>): string {

@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import type { DamageType, DiceSize, EquipmentRow, WeaponRow } from '../character-sheet/types'
 import { coerceDiceSize, DICE_SIZES } from '../character-sheet/types'
 import { rawJsonEntriesPlain } from './spellsData'
@@ -34,13 +35,15 @@ let cache: RawItem[] | null = null
 
 export async function loadAllRawItems(): Promise<RawItem[]> {
   if (cache) return cache
-  const loaders = Object.values(itemsModules)
-  if (loaders.length !== 1) {
-    throw new Error('Expected exactly one items.json module from glob')
-  }
-  const mod = await loaders[0]!()
-  cache = Array.isArray(mod.item) ? mod.item : []
-  return cache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(itemsModules)
+    if (loaders.length !== 1) {
+      throw new Error('Expected exactly one items.json module from glob')
+    }
+    const mod = await loaders[0]!()
+    cache = Array.isArray(mod.item) ? mod.item : []
+    return cache
+  })
 }
 
 export function itemRef(item: Pick<RawItem, 'name' | 'source'>): string {

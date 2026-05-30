@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import { rawJsonEntriesPlain } from './spellsData'
 
 /**
@@ -31,15 +32,17 @@ let cache: RawRace[] | null = null
 
 export async function loadAllRawRaces(): Promise<RawRace[]> {
   if (cache) return cache
-  const loaders = Object.values(racesModules)
-  if (loaders.length !== 1) {
-    throw new Error('Expected exactly one races.json module from glob')
-  }
-  const raw = (await loaders[0]!()) as Record<string, unknown>
-  const mod = unwrap5eToolsJsonModule(raw)
-  const list = mod.race
-  cache = Array.isArray(list) ? (list as RawRace[]) : []
-  return cache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(racesModules)
+    if (loaders.length !== 1) {
+      throw new Error('Expected exactly one races.json module from glob')
+    }
+    const raw = (await loaders[0]!()) as Record<string, unknown>
+    const mod = unwrap5eToolsJsonModule(raw)
+    const list = mod.race
+    cache = Array.isArray(list) ? (list as RawRace[]) : []
+    return cache
+  })
 }
 
 export function raceRef(race: Pick<RawRace, 'name' | 'source'>): string {

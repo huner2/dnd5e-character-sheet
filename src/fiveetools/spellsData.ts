@@ -1,3 +1,4 @@
+import { withStaleChunkRecovery } from '../chunkLoadRecovery'
 import type { SpellbookRow } from '../character-sheet/types'
 
 /**
@@ -117,38 +118,44 @@ export function findRawSpellByRefString(
 
 export async function loadSpellFileIndex(): Promise<SpellFileIndex> {
   if (spellIndexCache) return spellIndexCache
-  const loaders = Object.values(spellIndexLoaders)
-  if (loaders.length === 0) {
-    throw new Error('5etools spell index.json not found (check vendor/5etools-src).')
-  }
-  spellIndexCache = await loaders[0]()
-  return spellIndexCache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(spellIndexLoaders)
+    if (loaders.length === 0) {
+      throw new Error('5etools spell index.json not found (check vendor/5etools-src).')
+    }
+    spellIndexCache = await loaders[0]()
+    return spellIndexCache
+  })
 }
 
 /** All spell records from every `spells-*.json` chunk (cached after first load). */
 export async function loadAllRawSpells(): Promise<RawSpell[]> {
   if (allSpellsCache) return allSpellsCache
-  const loaders = Object.entries(spellChunkModules)
-  if (loaders.length === 0) {
-    throw new Error('No spells-*.json chunks found under vendor/5etools-src/data/spells.')
-  }
-  const chunks = await Promise.all(loaders.map(([, load]) => load()))
-  const out: RawSpell[] = []
-  for (const mod of chunks) {
-    if (Array.isArray(mod.spell)) out.push(...mod.spell)
-  }
-  allSpellsCache = out
-  return out
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.entries(spellChunkModules)
+    if (loaders.length === 0) {
+      throw new Error('No spells-*.json chunks found under vendor/5etools-src/data/spells.')
+    }
+    const chunks = await Promise.all(loaders.map(([, load]) => load()))
+    const out: RawSpell[] = []
+    for (const mod of chunks) {
+      if (Array.isArray(mod.spell)) out.push(...mod.spell)
+    }
+    allSpellsCache = out
+    return out
+  })
 }
 
 export async function loadSpellSourcesJson(): Promise<SpellSourcesJson> {
   if (spellSourcesCache) return spellSourcesCache
-  const loaders = Object.values(spellSourcesLoaders)
-  if (loaders.length === 0) {
-    throw new Error('5etools sources.json not found (check vendor/5etools-src).')
-  }
-  spellSourcesCache = await loaders[0]()
-  return spellSourcesCache
+  return withStaleChunkRecovery(async () => {
+    const loaders = Object.values(spellSourcesLoaders)
+    if (loaders.length === 0) {
+      throw new Error('5etools sources.json not found (check vendor/5etools-src).')
+    }
+    spellSourcesCache = await loaders[0]()
+    return spellSourcesCache
+  })
 }
 
 export function getSpellSourceRecord(
